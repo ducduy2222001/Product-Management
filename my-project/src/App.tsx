@@ -1,8 +1,8 @@
 import React, { Fragment } from "react";
-import ListProducts from "./pages/Products/page";
+import ListProducts from "./pages/Products/components";
 import { Route, Routes } from "react-router-dom";
-import AddProduct from "./pages/AddProduct/page";
-import UpdateProduct from "./pages/UpdateProduct/page";
+import AddProduct from "./pages/AddProduct/components";
+import UpdateProduct from "./pages/UpdateProduct/components";
 
 function App() {
   return (

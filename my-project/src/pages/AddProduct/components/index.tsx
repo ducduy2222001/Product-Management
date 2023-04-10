@@ -1,6 +1,7 @@
 import React from "react";
-import FormUpdate from "../components/FormUpdate";
+
 import { Row, Col } from "antd";
+import FormAdd from "./FormAdd";
 
 const styleRowCol = {
   width: "100%",
@@ -8,14 +9,15 @@ const styleRowCol = {
   alignItems: "center",
   justifyContent: "center",
 };
-function UpdateProduct() {
+
+function AddProduct() {
   return (
     <Row style={styleRowCol}>
       <Col span={12}>
-        <FormUpdate />
+        <FormAdd />
       </Col>
     </Row>
   );
 }
 
-export default UpdateProduct;
+export default AddProduct;

@@ -1,6 +1,6 @@
 import { Button, Col, Layout, Row } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import "../layout/style.css";
 import { AudioOutlined } from "@ant-design/icons";
 import { Input } from "antd";
@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 const { Search } = Input;
 interface Props {
   children: ReactNode;
-  onSearch: (value: string) => void;
+  onSearch: (e: any) => void;
 }
 const suffix = (
   <AudioOutlined
@@ -20,22 +20,30 @@ const suffix = (
 );
 
 const styleRowCol = {
-  width: "100%",
+  width: "50%",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
 };
 
 function Navigation({ children, onSearch }: Props) {
-  const handleFilterSearch = (value: any) => {
-    onSearch(value);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const handleFilterSearch = (e: any) => {
+    if (!onSearch) return;
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      onSearch(e);
+    }, 300);
   };
 
   return (
     <Layout className="layout">
       <Header className="header">
         <Row style={styleRowCol}>
-          <Col span={6} style={styleRowCol}>
+          <Col span={24} style={styleRowCol}>
             <Search
               placeholder="input search text"
               allowClear
@@ -45,11 +53,6 @@ function Navigation({ children, onSearch }: Props) {
               className="search"
             />
           </Col>
-          <Col span={6} style={styleRowCol}>
-            <Link to="/add">
-              <Button type="primary">Add</Button>
-            </Link>
-          </Col>
         </Row>
       </Header>
       <Layout>
@@ -58,5 +61,4 @@ function Navigation({ children, onSearch }: Props) {
     </Layout>
   );
 }
-
 export default Navigation;

@@ -20,35 +20,42 @@ const validateMessages = {
 
 const FormUpdate: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>(); // lay id tu URL
-  const [product, setProduct] = useState<any>(null);
-
-  useEffect(() => {
-    getProductById(id)
-      .then((res) => {
-        console.log(res);
-        setProduct(res.data); // gan thong tin san pham vao state
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, [id]);
-
+  const storegaKey = "data";
+  const { id } = useParams();
+  const [pr, setPr] = useState([]);
+  // const [product, setProduct] = useState<any>(null);
   const onFinish = (values: any) => {
-    updateProduct(id, values)
-      .then((res) => {
-        console.log(res);
-        // navigate("/");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    console.log(values);
+    const listPro = JSON.parse(localStorage.getItem(storegaKey) || "[]");
+    let newProduct = { ...values, id: Number(id) };
+    const index = listPro.findIndex((item: any) => {
+      return item.id == newProduct.id;
+    });
+    listPro[index] = newProduct;
+    localStorage.setItem("data", JSON.stringify(listPro));
+    navigate("/");
   };
-  {
-    // console.log(product);
-  }
+  // useEffect(() => {
+  //   getProductById(id)
+  //     .then((res) => {
+  //       console.log(res);
+  //       setProduct(res.data);
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     });
+  // }, [id]);
 
+  // const onFinish = (values: any) => {
+  //   updateProduct(id, values)
+  //     .then((res) => {
+  //       console.log(res);
+  // navigate("/");
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     });
+  //   console.log(values);
+  // };
   return (
     <Form
       {...layout}
@@ -56,12 +63,12 @@ const FormUpdate: React.FC = () => {
       onFinish={onFinish}
       style={{ maxWidth: 600 }}
       validateMessages={validateMessages}
-      initialValues={{
-        title: product?.title || "",
-        origin: product?.origin || "",
-        price: product?.price || "",
-        image: product?.image || "",
-      }}
+      // initialValues={{
+      //   title: product?.title || "",
+      //   origin: product?.origin || "",
+      //   price: product?.price || "",
+      //   image: product?.image || "",
+      // }}
     >
       <Form.Item name={"title"} label="Title" rules={[{ required: true }]}>
         <Input />
