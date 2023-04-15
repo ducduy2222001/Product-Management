@@ -27,7 +27,7 @@ const FormData: React.FC = () => {
     const maxId = listPro.reduce((add: number, product: any) => {
       return product.id > add ? product.id : add;
     }, 0);
-    const newProduct = { ...values, id: maxId + 1 }; // Gán ID mới
+    const newProduct = { ...values, id: maxId + 1, selected: false }; // Gán ID mới
     listPro.unshift(newProduct);
     localStorage.setItem("data", JSON.stringify(listPro));
     // navigate("/");
@@ -66,16 +66,13 @@ const FormData: React.FC = () => {
       <Form.Item
         name={"price"}
         label="Price"
-        rules={[{ type: "number", min: 10000, max: 99999999 }]}
+        rules={[{ type: "number", min: 100000, max: 9999999 }]}
       >
         <InputNumber
           formatter={show}
           onChange={(value) => setFormData({ ...formData, price: value })}
         />
       </Form.Item>
-      {/* <Form.Item name={["image"]} label="Image">
-        <UploadImage onImageData={handleImageData} />
-      </Form.Item> */}
       <Form.Item
         name={["image"]}
         label="Link Image"

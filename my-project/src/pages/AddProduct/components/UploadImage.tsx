@@ -29,7 +29,6 @@ const UploadImage: React.FC<UploadImageProps> = ({ onImageData }) => {
     const imgWindow = window.open(src);
     imgWindow?.document.write(image.outerHTML);
   };
-
   return (
     <ImgCrop rotationSlider>
       <Upload

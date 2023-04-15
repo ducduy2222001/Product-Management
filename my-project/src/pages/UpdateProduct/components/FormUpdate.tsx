@@ -22,7 +22,6 @@ const FormUpdate: React.FC = () => {
   const navigate = useNavigate();
   const storegaKey = "data";
   const { id } = useParams();
-  const [pr, setPr] = useState([]);
   // const [product, setProduct] = useState<any>(null);
   const onFinish = (values: any) => {
     const listPro = JSON.parse(localStorage.getItem(storegaKey) || "[]");
