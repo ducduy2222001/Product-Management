@@ -1,44 +1,38 @@
 import { Select } from "antd";
+import { Option } from "antd/es/mentions";
 import React, { useState, useEffect } from "react";
+import { ProductType } from "../types";
 
 interface Props {
-  onSelect: (e: any) => void;
+  onSelect: (e: string) => void;
 }
 
 function SelectComponent({ onSelect }: Props) {
-  const storageKey = "data";
-  const [item, setItem] = useState([]);
+  const [items, setItems] = useState<ProductType[]>([]);
   useEffect(() => {
-    const storedData = localStorage.getItem(storageKey);
+    const storedData = localStorage.getItem("data");
     if (storedData) {
       const data: [] = JSON.parse(storedData);
-      setItem([...data]);
+      setItems([...data]);
     }
   }, []);
-
-  const handleChange = (e: any) => {
-    onSelect(e.value);
+  const handleChange = (e: string) => {
+    onSelect(e);
   };
-
-  const origins = item.map((e: any) => {
-    return e.origin;
-  });
-
-  const uniqueOrigins = origins.filter((origin, index) => {
-    return origins.indexOf(origin) === index;
-  });
+  const duplicateTypeOrigins = Array.from(
+    new Set(
+      items.map((item: ProductType) => {
+        return item.origin;
+      })
+    )
+  );
 
   return (
-    <Select
-      labelInValue
-      defaultValue={{ value: "...", label: "..." }}
-      style={{ width: 120 }}
-      onChange={handleChange}
-      options={uniqueOrigins.map((origin) => ({
-        value: origin,
-        label: origin,
-      }))}
-    />
+    <Select style={{ width: 120 }} onChange={handleChange}>
+      {duplicateTypeOrigins.map((origin: string) => {
+        return <Option value={origin}>{origin}</Option>;
+      })}
+    </Select>
   );
 }
 

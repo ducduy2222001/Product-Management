@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Form, Input, InputNumber } from "antd";
 import { getProductById, updateProduct } from "../../../services/ProductApi";
 import { useNavigate, useParams } from "react-router-dom";
+import { ProductAdd, ProductType } from "../../../types";
 const layout = {
   labelCol: { span: 8 },
   wrapperCol: { span: 16 },
@@ -20,41 +21,55 @@ const validateMessages = {
 
 const FormUpdate: React.FC = () => {
   const navigate = useNavigate();
-  const storegaKey = "data";
   const { id } = useParams();
-  // const [product, setProduct] = useState<any>(null);
-  const onFinish = (values: any) => {
-    const listPro = JSON.parse(localStorage.getItem(storegaKey) || "[]");
+  const [imageData, setImageData] = useState<string>("");
+
+  const onFinish = (values: ProductAdd) => {
+    const products = JSON.parse(localStorage.getItem("data") || "[]");
     let newProduct = { ...values, id: Number(id) };
-    const index = listPro.findIndex((item: any) => {
-      return item.id == newProduct.id;
+    const index = products.findIndex((product: any) => {
+      return product.id == newProduct.id;
     });
-    listPro[index] = newProduct;
-    localStorage.setItem("data", JSON.stringify(listPro));
+    var currentDate = new Date();
+    // Get the current hours, minutes, and seconds from the Date object
+    var hours = currentDate.getHours();
+    var minutes = currentDate.getMinutes();
+    var seconds = currentDate.getSeconds();
+    var day = currentDate.getDate();
+    var month = currentDate.getMonth() + 1; // Add 1 to the month, as it's zero-based
+    var year = currentDate.getFullYear();
+    // Format the time as a string
+    var timeString =
+      `${day}/${month}/${year} ` + hours + ":" + minutes + ":" + seconds;
+    newProduct.time = timeString;
+    newProduct.image = imageData;
+    products[index] = newProduct;
+    localStorage.setItem("data", JSON.stringify(products));
     navigate("/");
   };
-  // useEffect(() => {
-  //   getProductById(id)
-  //     .then((res) => {
-  //       console.log(res);
-  //       setProduct(res.data);
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  // }, [id]);
+  const show = (value: any) =>
+    ` ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const handleFileChange = (e: any) => {
+    const file = e.target.files[0];
 
-  // const onFinish = (values: any) => {
-  //   updateProduct(id, values)
-  //     .then((res) => {
-  //       console.log(res);
-  // navigate("/");
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  //   console.log(values);
-  // };
+    // Create a FileReader object to read the file data
+    const reader = new FileReader();
+
+    // Set the onload event handler to update the state with the image data
+    reader.onload = (event: any) => {
+      setImageData(event?.target.result);
+    };
+    // Read the file data as a Data URL
+    reader.readAsDataURL(file);
+  };
+
+  const product = localStorage.getItem("data");
+  const datas = product ? JSON.parse(product) : [];
+  const check = datas.filter((data: any) => {
+    return data.id == id;
+  });
+  const { title, origin, price } = check[0] || {};
+
   return (
     <Form
       {...layout}
@@ -62,28 +77,26 @@ const FormUpdate: React.FC = () => {
       onFinish={onFinish}
       style={{ maxWidth: 600 }}
       validateMessages={validateMessages}
-      // initialValues={{
-      //   title: product?.title || "",
-      //   origin: product?.origin || "",
-      //   price: product?.price || "",
-      //   image: product?.image || "",
-      // }}
     >
       <Form.Item name={"title"} label="Title" rules={[{ required: true }]}>
-        <Input />
+        <Input defaultValue={title} />
       </Form.Item>
       <Form.Item name={"origin"} label="Origin" rules={[{ required: true }]}>
-        <Input />
+        <Input defaultValue={origin} />
       </Form.Item>
       <Form.Item
         name={"price"}
         label="Price"
         rules={[{ type: "number", min: 10000, max: 99999999 }]}
       >
-        <InputNumber />
+        <InputNumber formatter={show} defaultValue={price} />
       </Form.Item>
-      <Form.Item name={"image"} label="Image" rules={[{ required: true }]}>
-        <Input />
+      <Form.Item
+        name={["image"]}
+        label="Link Image"
+        rules={[{ required: true }]}
+      >
+        <input type="file" onChange={handleFileChange} />
       </Form.Item>
       <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
         <Button type="primary" htmlType="submit">

@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { Button, Form, Input, InputNumber, UploadFile } from "antd";
-import { postProducts } from "../../../services/ProductApi";
 import { useNavigate } from "react-router-dom";
-import UploadImage from "./UploadImage";
+import { Button, Form, Input, InputNumber } from "antd";
+import { ProductAdd, ProductType } from "../../../types";
 const layout = {
   labelCol: { span: 8 },
   wrapperCol: { span: 16 },
@@ -21,68 +20,64 @@ const validateMessages = {
 
 const FormData: React.FC = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({});
-  const onFinish = (values: any) => {
+  const [imageData, setImageData] = useState<string>(""); // Display the current time
+  const onFinish = (values: ProductAdd) => {
     const listPro = JSON.parse(localStorage.getItem("data") || "[]");
-    const maxId = listPro.reduce((add: number, product: any) => {
+    const maxId = listPro.reduce((add: number, product: ProductType) => {
       return product.id > add ? product.id : add;
     }, 0);
-    const newProduct = { ...values, id: maxId + 1, selected: false }; // Gán ID mới
-    listPro.unshift(newProduct);
+    const newValue = { ...values, id: maxId + 1, selected: false };
+    var currentDate = new Date();
+    var hours = currentDate.getHours();
+    var minutes = currentDate.getMinutes();
+    var seconds = currentDate.getSeconds();
+    var day = currentDate.getDate();
+    var month = currentDate.getMonth() + 1; // Add 1 to the month, as it's zero-based
+    var year = currentDate.getFullYear();
+    var timeString =
+      `${day}/${month}/${year} ` + hours + ":" + minutes + ":" + seconds;
+    newValue.time = timeString;
+    newValue.image = imageData;
+    listPro.unshift(newValue);
     localStorage.setItem("data", JSON.stringify(listPro));
     // navigate("/");
-    console.log(values.image.slice(0, 10).join("."));
-
-    // postProducts(formData)
-    //   .then((res) => {
-    //     console.log(res);
-    //     navigate("/");
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //   });
   };
-  const show = (value: any) =>
+  const show = (value?: number) =>
     ` ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
+  const handleFileChange = (e: any) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (event: any) => {
+      setImageData(event?.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
   return (
     <Form
       {...layout}
       name="nest-messages"
       onFinish={onFinish}
-      style={{ maxWidth: 600 }}
       validateMessages={validateMessages}
     >
       <Form.Item name={"title"} label="Title" rules={[{ required: true }]}>
-        <Input
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-        />
+        <Input />
       </Form.Item>
       <Form.Item name={"origin"} label="Origin" rules={[{ required: true }]}>
-        <Input
-          onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
-        />
+        <Input />
       </Form.Item>
       <Form.Item
         name={"price"}
         label="Price"
         rules={[{ type: "number", min: 100000, max: 9999999 }]}
       >
-        <InputNumber
-          formatter={show}
-          onChange={(value) => setFormData({ ...formData, price: value })}
-        />
+        <InputNumber formatter={show} />
       </Form.Item>
       <Form.Item
         name={["image"]}
         label="Link Image"
         rules={[{ required: true }]}
       >
-        <Input
-          onChange={(value) => {
-            setFormData({ ...formData, image: value });
-          }}
-        />
+        <input type="file" onChange={handleFileChange} />
       </Form.Item>
       <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
         <Button type="primary" htmlType="submit">

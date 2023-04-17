@@ -1,114 +1,92 @@
 import React, { useEffect, useState } from "react";
 import Navigation from "../../../components/layout/Navigation";
-import TableList from "./TableList";
-import { Link } from "react-router-dom";
 import { Button, Col, Row, Space } from "antd";
+import { Link } from "react-router-dom";
+import SliderComponent from "../../../components/SliderComponent/components/SliderComponent";
 import SearchComponent from "../../../components/SearchComponent";
 import SelectComponent from "../../../components/SelectComponent";
-import SliderComponent from "../../../components/SliderComponent/components/SliderComponent";
-import { SearchOutlined } from "@ant-design/icons";
+import { ProductType } from "../../../types";
+import TableList from "./TableList";
+
 const styleRowLeft = {
   width: "100%",
   display: "flex",
   alignItems: "center",
   justifyContent: "left ",
 };
+
 const styleRowRigth = {
   width: "100%",
   display: "flex",
   alignItems: "center",
   justifyContent: "right ",
 };
+
 function ListProducts() {
-  const storageKey = "data";
-  const [listProduct, setListProduct] = useState<any[]>([]);
-  const [list, setList] = useState<any[]>([]);
-  const [text, setText] = useState("");
-  const [idList, setIdList] = useState<number[]>([]);
+  const [listProduct, setListProduct] = useState<ProductType[]>([]);
+  const [text, setText] = useState<string>("");
   const [selectList, setSelectList] = useState<any[]>([]);
+  const [origin, setOrigin] = useState<string>("");
+  const [price, setPrice] = useState<any[]>([]);
 
   useEffect(() => {
-    const storedData = localStorage.getItem(storageKey);
+    const storedData = localStorage.getItem("data");
     if (storedData) {
       const data: [] = JSON.parse(storedData);
       setListProduct([...data]);
-      setList([...data]);
     }
   }, []);
 
   const handleFiltersChange = (e: any) => {
-    const value: string = e.target.value;
-    setText(value);
-    if (value) {
-      const filteredProducts = list.filter((product: any) => {
-        return product.title.toLowerCase().includes(value.toLowerCase());
-      });
-      setListProduct([...filteredProducts]);
-      localStorage.setItem("dataNew", JSON.stringify([...filteredProducts]));
-    } else {
-      const storedData = localStorage.getItem(storageKey);
-      if (storedData) {
-        const data: [] = JSON.parse(storedData);
-        setListProduct([...data]);
+    const text = e.target.value;
+    setText(text);
+    handleFilter(text, origin, price);
+  };
+  const handleFilter = (text: string, origin: string, price: any) => {
+    let data = localStorage.getItem("data") as any;
+    if (data) {
+      data = JSON.parse(data);
+      var products;
+      if (price.length < 1) {
+        products = data.filter((product: ProductType) => {
+          return (
+            product.title.toLowerCase().includes(text.toLowerCase()) &&
+            product.origin.toLowerCase().includes(origin.toLowerCase())
+          );
+        });
+      } else {
+        products = data.filter((product: any) => {
+          return (
+            product.title.toLowerCase().includes(text.toLowerCase()) &&
+            product.origin.toLowerCase().includes(origin.toLowerCase()) &&
+            parseFloat(product.price) > parseFloat(price[0]) &&
+            parseFloat(product.price) < parseFloat(price[1])
+          );
+        });
       }
+
+      setListProduct([...products]);
     }
+  };
+  const handleFiltersSelect = (nameOrigin: string) => {
+    setOrigin(nameOrigin);
+    handleFilter(text, nameOrigin, price);
   };
 
   const filters = (productList: any) => {
     setListProduct([...productList]);
-    const storedData = localStorage.getItem(storageKey);
-    if (storedData) {
-      const data: [] = JSON.parse(storedData);
-      setList([...data]);
-    }
+    handleFilter(text, origin, price);
   };
 
-  const handleFiltersSelect = (products: any) => {
-    const storedDataNew = localStorage.getItem("dataNew");
-    const storedData = localStorage.getItem("data");
-    if (storedDataNew && text !== "") {
-      const data: [] = JSON.parse(storedDataNew);
-      const filterSelect = data.filter((e: any) => {
-        return e.origin.toLowerCase().includes(products.toLowerCase());
-      });
-      localStorage.setItem("dataNew", JSON.stringify([...filterSelect]));
-      setListProduct([...filterSelect]);
-      localStorage.setItem("dataNew", JSON.stringify([...filterSelect]));
-    } else {
-      if (storedData) {
-        const data: [] = JSON.parse(storedData);
-        const filterSelect = data.filter((e: any) => {
-          return e.origin.toLowerCase().includes(products.toLowerCase());
-        });
-        localStorage.setItem("dataNew", JSON.stringify([...filterSelect]));
-        setListProduct(filterSelect);
-      }
-    }
+  const handleFilterSlider = (price: number[] | [number, number]) => {
+    console.log(price);
+
+    setPrice([...price]);
+    handleFilter(text, origin, price);
   };
 
-  const handleFilterSlider = (products: any) => {
-    const storedDataNew = localStorage.getItem("dataNew");
-    const storedData = localStorage.getItem("data");
-
-    if (storedDataNew && text !== "") {
-      const data: [] = JSON.parse(storedDataNew);
-      const filteredProducts = data.filter((product: any) => {
-        return product.price >= products[0] && product.price <= products[1];
-      });
-      setListProduct([...filteredProducts]);
-    } else {
-      if (storedData) {
-        const data: [] = JSON.parse(storedData);
-        const filteredProducts = data.filter((product: any) => {
-          return product.price >= products[0] && product.price <= products[1];
-        });
-        setListProduct(filteredProducts);
-      }
-    }
-  };
-
-  const handleCheckboxChangeToDelete = (record: any) => {
-    const productID = listProduct.findIndex((product: any) => {
+  const handleCheckboxChangeToDelete = (record: ProductType) => {
+    const productID = listProduct.findIndex((product: ProductType) => {
       return product.id === record.id;
     });
     const temp = [...listProduct];
@@ -119,29 +97,28 @@ function ListProducts() {
   const handleDeleteSelect = () => {
     const storedData = localStorage.getItem("data");
     if (storedData) {
-      const data: [] = JSON.parse(storedData);
-      const filteredProducts = selectList.filter((product: any) => {
+      const filteredProducts = selectList.filter((product: ProductType) => {
         return !product.selected;
       });
-      localStorage.setItem("data", JSON.stringify([...filteredProducts]));
       setListProduct([...filteredProducts]);
+      localStorage.setItem("data", JSON.stringify(filteredProducts));
     }
   };
   return (
     <Navigation>
-      <Row style={{ padding: "20px" }}>
-        <Col span={15}>
+      <Row style={{ padding: "20px", width: "100%" }}>
+        <Col xs={24} sm={15}>
           <Row style={styleRowLeft} gutter={16}>
-            <Col span={6} style={{ textAlign: "center" }}>
+            <Col span={6} style={{ textAlign: "center", position: "relative" }}>
               <SearchComponent onSearch={handleFiltersChange} />
             </Col>
-            <Col span={6} style={{ textAlign: "center" }}>
+            <Col span={6} style={{ textAlign: "center", position: "relative" }}>
               <Space>
                 Origin:
                 <SelectComponent onSelect={handleFiltersSelect} />
               </Space>
             </Col>
-            <Col span={6} style={{ textAlign: "center" }}>
+            <Col span={6} style={{ textAlign: "center", position: "relative" }}>
               <Space style={{ width: "100%" }}>
                 Price:
                 <div style={{ width: "100%" }}>
@@ -151,7 +128,7 @@ function ListProducts() {
             </Col>
           </Row>
         </Col>
-        <Col span={9}>
+        <Col xs={24} sm={9} className="duy">
           <Row style={styleRowRigth}>
             <Col span={5}>
               <Link to="/add">
@@ -162,7 +139,6 @@ function ListProducts() {
               <Button onClick={handleDeleteSelect} type="primary">
                 Delete Selected
               </Button>
-              {/* <Button type="primary">Delete Selected</Button> */}
             </Col>
           </Row>
         </Col>

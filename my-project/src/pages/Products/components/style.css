@@ -3,3 +3,16 @@
   width: 10px;
   text-align: center;
 }
+/* Luật kiểu cho màn hình nhỏ hơn hoặc bằng 768px (xs) */
+@media (max-width: 768px) {
+  /* Điều chỉnh kiểu dáng của các thành phần tại đây */
+  .duy {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+
+/* Luật kiểu cho màn hình lớn hơn 768px (sm, md, lg, xl) */
+@media (min-width: 769px) {
+  /* Điều chỉnh kiểu dáng của các thành phần tại đây */
+}

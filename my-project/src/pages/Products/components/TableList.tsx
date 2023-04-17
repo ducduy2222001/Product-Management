@@ -1,23 +1,42 @@
-import { Button, Space } from "antd";
 import { useNavigate } from "react-router-dom";
 import { Table, Checkbox } from "antd";
+import { Button, Space } from "antd";
 import "./style.css";
+import { ProductType } from "../../../types";
+
 function TableList(props: any) {
   const { data, handleCheckboxChangeToDelete } = props;
   const navigate = useNavigate();
-  const handleCheckboxChange = (record: any) => {
-    handleCheckboxChangeToDelete(record);
+  const handleCheckboxChange = (item: any) => {
+    handleCheckboxChangeToDelete(item);
   };
-  const columns = [
+
+  const handleFilters = (key: string) => {
+    const duplicateType = Array.from(
+      new Set(
+        data.map((item: any) => {
+          return item[key];
+        })
+      )
+    );
+    const result = duplicateType.map((value) => {
+      return { text: value, value: value };
+    });
+    return result;
+  };
+  const handleOnFilter = (value: string, record: any, key: string) =>
+    record[key].startsWith(value);
+
+  const columns: any = [
     {
       title: "Select",
       dataIndex: "Select",
       key: "Select",
-      render: (text: any, record: any) => {
+      render: (text: any, item: ProductType) => {
         return (
           <Checkbox
-            checked={record.selected}
-            onChange={() => handleCheckboxChange(record)}
+            checked={item.selected}
+            onChange={() => handleCheckboxChange(item)}
           />
         );
       },
@@ -26,30 +45,53 @@ function TableList(props: any) {
       title: "Title",
       dataIndex: "title",
       key: "title",
+      filters: handleFilters("title"),
+      onFilter: (value: string, record: ProductType) =>
+        handleOnFilter(value, record, "title"),
+      sorter: (a: string, b: string) => {
+        return 1;
+      },
     },
     {
       title: "Origin",
       dataIndex: "origin",
       key: "origin",
+      filters: handleFilters("origin"),
+      onFilter: (value: string, record: ProductType) =>
+        handleOnFilter(value, record, "origin"),
+      sorter: (a: string, b: string) => {
+        return 1;
+      },
     },
     {
       title: "Price",
       dataIndex: "price",
       key: "price",
+      sorter: (a: number, b: number) => {
+        return 1;
+      },
     },
     {
       title: "Image",
       dataIndex: "image",
       key: "image",
-      render: (image: any) => (
+      render: (image: string) => (
         <img src={image} alt="Avatar" style={{ maxWidth: "70px" }} />
       ),
+    },
+    {
+      title: "time",
+      dataIndex: "time",
+      key: "time",
+      sorter: (a: string, b: string) => {
+        return 1;
+      },
     },
     {
       title: "Action",
       dataIndex: "",
       key: "x",
-      render: (product: any) => (
+      render: (product: ProductType) => (
         <Space>
           <Button onClick={() => handleDeleteProduct(product)}>Delete</Button>
           <Button onClick={() => handleUpdateProduct(product)}>Edit</Button>
@@ -58,32 +100,19 @@ function TableList(props: any) {
     },
   ];
 
-  const handleDeleteProduct = (product: any) => {
-    const data = localStorage.getItem("data");
-    if (data?.length) {
-      const dataFake = JSON.parse(data);
-      const productFilter = dataFake.filter((d: any) => {
-        return d.id !== product.id;
+  const handleDeleteProduct = (item: ProductType) => {
+    const storedData = localStorage.getItem("data");
+    if (storedData?.length) {
+      const data = JSON.parse(storedData);
+      const products = data.filter((product: ProductType) => {
+        return product.id !== item.id;
       });
-      localStorage.setItem("data", JSON.stringify(productFilter));
-      props.filters([...productFilter]);
-    }
-
-    const newData = localStorage.getItem("dataNew");
-    if (newData?.length) {
-      const dataFake = JSON.parse(newData);
-      const productFilter1 = dataFake.filter((d: any) => {
-        return d.id !== product.id;
-      });
-      localStorage.setItem("dataNew", JSON.stringify(productFilter1));
-      if (newData?.length == 0) {
-        props.filters([]);
-      }
-      props.filters([...productFilter1]);
+      localStorage.setItem("data", JSON.stringify(products));
+      props.filters([...products]);
     }
   };
 
-  const handleUpdateProduct = (product: any) => {
+  const handleUpdateProduct = (product: ProductType) => {
     navigate(`/update/${product.id}`);
   };
 
