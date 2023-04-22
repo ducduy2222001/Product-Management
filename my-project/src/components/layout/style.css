@@ -1,0 +1,35 @@
+.layout {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+.layout .ant-layout-header {
+  background-color: #1765ad;
+  color: aliceblue;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.header .anticon-plus-circle {
+  font-size: 30px;
+}
+
+.header .ant-btn-primary {
+  display: flex;
+  align-items: center;
+  line-height: auto;
+}
+
+.search {
+  width: 100%;
+}
